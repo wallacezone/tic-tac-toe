@@ -7,4 +7,4 @@ CHANGELOG
 
 v1.0
 - First version of the game. 
-- You play against the AI. Whether player or AI begins is decided randomly. AI knows some basic strategy but sometimes can make mistakes.
+- You play against the AI. Whether player or AI begins is decided randomly. AI knows some basic strategy but sometimes makes mistakes.
