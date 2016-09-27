@@ -1,6 +1,13 @@
 from random import randint
+from sys import exit
 
 # --------------------------- VARS & FUNCS ---------------------------
+
+# count of victories
+wins = {
+    'X': 0,
+    'O': 0
+}
 
 # the basic structure of the board
 board = [
@@ -16,36 +23,41 @@ board = [
 #   ----|----|----
 #    20 | 21 | 22
 
-# convert player's more readable input to list format
-def convert_input(i):
+# input correspondences
+in_corrs = {
+    'TL': [0, 0], 'TM': [0, 1], 'TR': [0, 2],
+    'ML': [1, 0], 'MM': [1, 1], 'MR': [1, 2],
+    'LL': [2, 0], 'LM': [2, 1], 'LR': [2, 2]
+}
 
-    # workaround if user inputs a string != 2 chars
-    if len(i) != 2:
+# convert string input to list or viceversa depending on i_type arg
+def convert_input(i, i_type):
+
+    if i_type == 'string':
+
+        # help
+        if i == 'help':
+            show_help()
+            return [3,3]
+
+        # exit
+        if i == 'exit':
+            print()
+            exit(0)
+
+        # convert input
+        for key, value in in_corrs.items():
+            if i == key:
+                return value
+
+        # if input is not valid
         return [3, 3]
 
-    # convert x value
-    if i[0] == 'T':
-        x = 0
-    elif i[0] == 'M':
-        x = 1
-    elif i[0] == 'L':
-        x = 2
-    else:
-        x = 3
+    elif i_type == 'list':
 
-    # convert y value
-    if i[1] == 'L':
-        y = 0
-    elif i[1] == 'M':
-        y = 1
-    elif i[1] == 'R':
-        y = 2
-    else:
-        y = 3
-
-    # if return value is 3, the index will be out of range and the error
-    # will be managed after calling this function
-    return [x, y]
+        for key, value in in_corrs.items():
+            if i == value:
+                return key
 
 # display the current board
 def print_board(board):
@@ -54,6 +66,17 @@ def print_board(board):
     print('  ' + board[1][0] + ' | ' + board[1][1] + ' | ' + board[1][2])
     print(' ---+---+---')
     print('  ' + board[2][0] + ' | ' + board[2][1] + ' | ' + board[2][2])
+
+# show help
+def show_help():
+    print()
+    print(' Type the correspondent cell to move on that space:')
+    print()
+    print('  TL | TM | TR ')
+    print(' ----+----+----')
+    print('  ML | MM | MR ')
+    print(' ----+----+----')
+    print('  LL | LM | LR ')
 
 # compute the AI move based on the current board
 def compute_ai(board):
@@ -120,8 +143,8 @@ def compute_ai(board):
     if board[1][1] == ' ' and randint(1,2) == 1:
         return [1, 1]
 
-    # if a corner is empty, fill it (choose a random corner)
-    r = randint(1,4)
+    # if a corner is empty, fill it (choose a random corner) (only half times)
+    r = randint(1,8)
     if r == 1:
         if board[0][0] == ' ':
             return [0, 0]
@@ -241,6 +264,10 @@ def ai_turn(board):
     x, y = compute_ai(board)
     board[x][y] = 'O'
 
+    # print AI move
+    print()
+    print(' AI moved on ' + convert_input([x, y], 'list'))
+
     # check whether AI has won
     if has_won(board):
         victor = 'O'
@@ -261,12 +288,13 @@ def player_turn(board):
     print()
 
     # ask for player's move
-    print(' Player: move on which space? (TL/TM/TR/ML/MM/MR/LL/LM/LR)')
+    print(' Player: move on which space? (\'help\' to see moves, \'exit\' to ' +
+        'exit)')
     print()
     move = input(' > ')
 
     # convert input
-    x, y = convert_input(move)
+    x, y = convert_input(move, 'string')
 
     # try to insert player's move into the board or ask again
     try:
@@ -288,56 +316,83 @@ def player_turn(board):
 
     return [board, '', '']
 
+# this func contains a single game
+def game(board):
+    # decide whether player or AI begins
+    print()
+    print(' You play X, AI plays O. Rolling dice to decide who begins...')
+    begin = 'X' if randint(1,2) == 1 else '0'
+    print()
+    print(' ' + begin + ' begins!')
+
+    # if AI begins, add just one AI turn at the beginning
+    if begin == 'O':
+        board, state, victor = ai_turn(board)
+
+    # turn loop
+    while True:
+
+        # player's turn
+        board, state, victor = player_turn(board)
+        if state == 'continue':
+            continue
+        elif state == 'break':
+            break
+
+        # AI's turn
+        board, state, victor = ai_turn(board)
+        if state == 'break':
+            break
+
+    # print result
+    print()
+    print_board(board)
+    print()
+    if victor == '':
+        print(' It\'s a draw!')
+    else:
+        wins[victor] += 1
+        print(' ' + victor + ' wins!')
+    print()
+    print(' Player has won ' + str(wins['X']) + ' time(s), AI has won ' + str(wins['O']) + ' time(s)')
+
+# reset board
+def reset_board(board):
+    for x in range(3):
+        for y in range(3):
+            board[x][y] = ' '
+
 # ------------------------------- MAIN -------------------------------
 
 # title
 print()
 print(' ------ TIC TAC TOE with Python ------')
 print()
-
-# decide whether player or AI begins
-print(' You play X, AI plays O. Rolling dice to decide who begins...')
-begin = 'X' if randint(1,2) == 1 else '0'
+print(' A simple game by Alessandro Barbieri')
 print()
-print(' ' + begin + ' begins!')
+print(' Code available at: https://github.com/wallacezone/tic-tac-toe')
 
-# main loop
 while True:
 
-    if begin == 'X':
+    # single game
+    game(board)
 
-        # player's turn
-        board, state, victor = player_turn(board)
-        if state == 'continue':
-            continue
-        elif state == 'break':
-            break
-
-        # AI's turn
-        board, state, victor = ai_turn(board)
-        if state == 'break':
-            break
-
+    # check whether player wants to play again
+    choice = ''
+    while choice != 'y' and choice != 'n':
+        print()
+        print(' Do you want to play again? (y/n)')
+        print()
+        choice = input(' > ')
+    if choice == 'y':
+        reset_board(board)
+        continue
     else:
+        print()
+        exit(0)
 
-        # AI's turn
-        board, state, victor = ai_turn(board)
-        if state == 'break':
-            break
 
-        # player's turn
-        board, state, victor = player_turn(board)
-        if state == 'continue':
-            continue
-        elif state == 'break':
-            break
 
-# print result
-print()
-print_board(board)
-print()
-if victor == '':
-    print(' It\'s a draw!')
-else:
-    print(' ' + victor + ' wins!')
-input()
+# TODO:
+#
+# - save num of victories in file
