@@ -1,3 +1,13 @@
+# --------------------------------------------------------------------
+#
+# TIC TAC TOE with Python (v1.1)
+#
+# A simple game by Alessandro Barbieri
+#
+# https://github.com/wallacezone/tic-tac-toe
+#
+# --------------------------------------------------------------------
+
 from random import randint
 from sys import exit
 
