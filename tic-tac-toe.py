@@ -331,7 +331,7 @@ def game(board):
     # decide whether player or AI begins
     print()
     print(' You play X, AI plays O. Rolling dice to decide who begins...')
-    begin = 'X' if randint(1,2) == 1 else '0'
+    begin = 'X' if randint(1,2) == 1 else 'O'
     print()
     print(' ' + begin + ' begins!')
 
